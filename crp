@@ -1,0 +1,187 @@
+if [ $# -eq 0 ]
+	then
+		echo "************** No directory name passed. Creating project inside current working directory. ***********************"
+else
+	echo "==== Creating project directory: $1 ===="
+	mkdir $1 && cd $1 
+fi
+
+echo "==== Creating a node project ===="
+npm init -y
+
+
+
+echo "==== Creating a directory structure ===="
+mkdir -p src/{components,styles}
+touch src/{app.js,index.tmpl} src/styles/index.less
+
+echo "===== Create sample react component ===="
+echo 'import React, { PropTypes, Component} from "react";
+import "./styles/index.less";
+
+export default class App extends Component {
+
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (<div>MyComponent</div>);
+  }
+}
+
+App.propTypes = {
+};
+' > src/index.jsx
+
+echo '<html>
+  <head>
+    <meta charset="utf-8">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="app" />
+  </body>
+</html>
+' > src/index.tmpl
+
+echo "==== Creating README.md ===="
+echo 'Auto created react project. - By. Jyotirmay Banerjee' >  README.md
+
+
+
+echo "==== Creating .babelrc ===="
+echo '{
+  "presets" : ["es2015", "react"]
+}' >  .babelrc
+
+
+
+echo "==== Creating .gitignore ===="
+echo 'node_modules
+.DS_Store
+dist
+*.log
+coverage
+.idea' >  .gitignore
+
+
+
+echo "==== Creating .eslintignore ===="
+echo 'dist
+node_modules
+coverage
+webpack.*.js
+*Server.js' >  .eslintignore
+
+
+
+
+echo "==== Creating .editorconfig ===="
+echo 'root = true
+
+# General settings for whole project
+[*]
+indent_style = space
+indent_size = 4
+
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Format specific overrides
+[*.md]
+trim_trailing_whitespace = false
+
+[app/**.js]
+indent_style = space
+indent_size = 2' >  .editorconfig
+
+
+
+echo "==== Creating .eslintrc ===="
+echo '"extends": "airbnb"' >  .eslintrc
+
+
+
+echo "==== Creating webpack.config.js ===="
+echo "var webpack = require('webpack');
+var path = require('path');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+var BUILD_DIR = path.resolve(__dirname, 'dist');
+var APP_DIR = path.resolve(__dirname, 'src/');
+
+function getEntrySources(sources) {
+    if (process.env.NODE_ENV !== 'production') {
+        sources.push('webpack/hot/only-dev-server');
+    }
+    return sources;
+}
+
+var config = {
+  entry: {
+    app: getEntrySources([
+            APP_DIR + '/index.jsx'
+        ]
+    ),
+    vendor: [
+        'react',
+        'react-dom',
+        'react-router'
+    ]
+  },
+  output: {
+    path: BUILD_DIR,
+    filename: '[name].[hash].js'
+  },
+  module : {
+    loaders : [
+      {
+        test : /\.jsx?/,
+        include : APP_DIR,
+        loaders : ['react-hot', 'babel', 'eslint'],
+        exclude: /node_modules/
+      },
+      {
+        test: /\.css$/,
+        loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
+      },
+      {
+         test: /\.less$/,
+         loader: ExtractTextPlugin.extract('style-loader', 'css-loader!less-loader')
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'My App',
+      inject: 'body',
+      template: 'src/index.tmpl'
+    }),
+    new ExtractTextPlugin('[name].[hash].css'),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.[hash].js'),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
+      }
+    }),
+    new webpack.optimize.DedupePlugin()
+  ]
+};
+
+module.exports = config;
+
+" >  webpack.config.js
+
+
+
+echo "==========================Installing dependencies ===================================="
+npm i -S react react-dom react-router
+npm i -D babel-core babel-eslint babel-loader babel-preset-es2015 babel-preset-react css-loader  extract-text-webpack-plugin html-webpack-plugin less less-loader react-hot-loader rimraf style-loader webpack webpack-dev-server
+npm i -D eslint eslint-loader eslint-plugin-react eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-jsx-a11y
+
+atom .
